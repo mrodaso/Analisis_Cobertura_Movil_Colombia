@@ -108,16 +108,22 @@ def grafico_generico(
 		)
 	
 	elif tipo == "pie":
-		hole = kwargs.pop('hole', 0)
-		fig = px.pie(
-			datos,
-			values=y,
-			names=x,
-			color=color,
-			template=template,
-			hole=hole,
-			**kwargs
-		)
+			hole = kwargs.pop('hole', 0)
+			# Extraer color_discrete_map si se proporcionó
+			color_discrete_map = kwargs.pop('color_discrete_map', None)
+			# Si hay un mapa de colores pero no se especificó 'color', usar 'x' como color
+			if color_discrete_map and not color:
+				color = x
+			fig = px.pie(
+				datos,
+				values=y,
+				names=x,
+				color=color,
+				color_discrete_map=color_discrete_map,
+				template=template,
+				hole=hole,
+				**kwargs
+			)
 	
 	elif tipo == "scatter":
 		fig = px.scatter(

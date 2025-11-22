@@ -6,11 +6,8 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from dashboard_code.read_csv import (
-    df, df_final_sorted, df_max_tecnologia,
-    conteo_operador, conteo_tecnologia, porcentaje_tecnologia,
-    df_top, df_cuenta_sin_tecnologia, 
-    corr_matrix, df_long, cols_operadores, cols_num, df_resumen, 
-    df_cob_max_depto_4g, counties
+    df, df_final_sorted, conteo_operador, conteo_tecnologia, porcentaje_tecnologia,
+    df_top, corr_matrix, df_cob_max_depto_4g, counties
 )
 from components.header import render_header
 from components.footer import render_footer
@@ -104,6 +101,7 @@ def main():
 	total_cpob = df_filtrado['CPOB'].nunique()
 	
 	st.markdown('<div style="margin-bottom: 2rem;"></div>', unsafe_allow_html=True)
+    # foto encabezado referencia 
 	# Grid Bento - Stats superiores
 	cols = st.columns([2, 1, 1], gap="medium")
 	with cols[0]:
