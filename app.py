@@ -175,7 +175,59 @@ def main():
 		}
 		}
 	)
-	
+ # --- GRÁFICO COMPARATIVO: Departamentos con mayor y menor cobertura (Plotly horizontal bars)
+	# Se muestra justo después de los mapas coropléticos
+	st.markdown('<div id="comparativo"></div>', unsafe_allow_html=True)
+	try:
+		# Preparar orden y categorías
+		categorias = list(df_comparativo['DEPARTAMENTO'])
+
+		fig = go.Figure()
+		operadores = df_comparativo['OPERADOR_MAX'].unique()
+		# Añadir una traza por operador para generar leyenda automática
+		for op in operadores:
+			sub = df_comparativo[df_comparativo['OPERADOR_MAX'] == op]
+			if sub.empty:
+				continue
+			fig.add_trace(go.Bar(
+				x=sub['PORCENTAJE_COBERTURA'],
+				y=sub['DEPARTAMENTO'],
+				orientation='h',
+				name=op,
+				marker_color=COLOR_OPERADORES.get(op, COLOR_OPERADORES['OTRO']),
+				text=[f"{abs(v):.1f}%" for v in sub['PORCENTAJE_COBERTURA']],
+				textposition='outside',
+				hovertemplate='<b>%{y}</b><br>Porcentaje: %{x:.1f}%<extra></extra>'
+			))
+
+		# Forzar orden de las categorías en el eje Y
+		fig.update_yaxes(categoryorder='array', categoryarray=categorias)
+
+		# Línea vertical en 0
+		fig.add_vline(x=0, line_width=1, line_color='black')
+
+		# Layout
+		fig.update_layout(
+			title=dict(text='Departamentos con mayor y menor cobertura móvil promedio (2024)', x=0.5, xanchor='center'),
+			xaxis_title='Porcentaje de cobertura promedio (%)',
+			yaxis_title='Departamento',
+			height=600,
+			margin=dict(l=200, r=80, t=100, b=80),
+			legend_title_text='Operador predominante'
+		)
+
+		# Usar el componente genérico para renderizar y forzar la leyenda de CLARO abajo a la derecha
+		grafico_generico(
+			tipo='custom',
+			datos=df_comparativo,
+			fig=fig,
+			key='grafico_10_comparativo',
+			force_legend=[{'name': 'CLARO', 'color': COLOR_OPERADORES.get('CLARO', '#ED1B24')}],
+			height=600
+		)
+	except Exception as e:
+		st.warning(f"No se pudo generar el gráfico comparativo (Plotly): {e}")
+			
 	# --- GRÁFICO 2 y 3: Layout Bento ---
 	st.markdown('<div id="operadores"></div>', unsafe_allow_html=True)
 	col1, col2 = st.columns([2, 3], gap="medium")
@@ -448,74 +500,19 @@ def main():
 						}
 					}
 				)
-
-	# --- GRÁFICO COMPARATIVO: Departamentos con mayor y menor cobertura (Plotly horizontal bars)
-	# Se muestra justo después de los mapas coropléticos
-	st.markdown('<div id="comparativo"></div>', unsafe_allow_html=True)
-	try:
-		# Preparar orden y categorías
-		categorias = list(df_comparativo['DEPARTAMENTO'])
-
-		fig = go.Figure()
-		operadores = df_comparativo['OPERADOR_MAX'].unique()
-		# Añadir una traza por operador para generar leyenda automática
-		for op in operadores:
-			sub = df_comparativo[df_comparativo['OPERADOR_MAX'] == op]
-			if sub.empty:
-				continue
-			fig.add_trace(go.Bar(
-				x=sub['PORCENTAJE_COBERTURA'],
-				y=sub['DEPARTAMENTO'],
-				orientation='h',
-				name=op,
-				marker_color=COLOR_OPERADORES.get(op, COLOR_OPERADORES['OTRO']),
-				text=[f"{abs(v):.1f}%" for v in sub['PORCENTAJE_COBERTURA']],
-				textposition='outside',
-				hovertemplate='<b>%{y}</b><br>Porcentaje: %{x:.1f}%<extra></extra>'
-			))
-
-		# Forzar orden de las categorías en el eje Y
-		fig.update_yaxes(categoryorder='array', categoryarray=categorias)
-
-		# Línea vertical en 0
-		fig.add_vline(x=0, line_width=1, line_color='black')
-
-		# Layout
-		fig.update_layout(
-			title=dict(text='Departamentos con mayor y menor cobertura móvil promedio (2024)', x=0.5, xanchor='center'),
-			xaxis_title='Porcentaje de cobertura promedio (%)',
-			yaxis_title='Departamento',
-			height=600,
-			margin=dict(l=200, r=80, t=100, b=80),
-			legend_title_text='Operador predominante'
-		)
-
-		# Usar el componente genérico para renderizar y forzar la leyenda de CLARO abajo a la derecha
-		grafico_generico(
-			tipo='custom',
-			datos=df_comparativo,
-			fig=fig,
-			key='grafico_10_comparativo',
-			force_legend=[{'name': 'CLARO', 'color': COLOR_OPERADORES.get('CLARO', '#ED1B24')}],
-			height=600
-		)
-	except Exception as e:
-		st.warning(f"No se pudo generar el gráfico comparativo (Plotly): {e}")
-		
-	st.markdown('<div id="footer"></div>', unsafe_allow_html=True)
 	
  
 		# Imagen de Colombia por Operador al final
 	st.markdown('<div style="margin: 3rem 0 2rem 0;"></div>', unsafe_allow_html=True)
 	col_center = st.columns([1, 2, 1])
 	with col_center[1]:
-		st.markdown('<h3 style="text-align: center; margin-bottom: 1.5rem;">Mapa de Cobertura por Operador</h3>', unsafe_allow_html=True)
 		try:
 			st.image("assets/colombia_por_oderador.png", width=1000, use_container_width=False)
 		except Exception as e:
 			st.warning(f"No se pudo cargar la imagen: {e}")
-	
-	# Botón Scroll to Top
+   
+   
+		# Botón Scroll to Top
 	st.markdown("""
 		<a href="#header" class="scroll-to-top" title="Volver arriba">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -523,7 +520,8 @@ def main():
 			</svg>
 		</a>
 	""", unsafe_allow_html=True)
-	
+	st.markdown('<div id="footer"></div>', unsafe_allow_html=True)
+
 	render_footer()
     
 if __name__ == "__main__":
