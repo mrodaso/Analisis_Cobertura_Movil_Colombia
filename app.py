@@ -171,7 +171,7 @@ def main():
 		grafico_generico(
 			tipo="bar",
 			datos=df_filtrado,
-			titulo="Área Total de Cobertura por Operador",
+			titulo="<br> Área Total de Cobertura por Operador",
 			x="OPERADOR",
 		y="AREA_TOTAL",
 			labels={"AREA_TOTAL": "Área Total (km²)", "OPERADOR": "Operador"},
@@ -192,7 +192,7 @@ def main():
 		grafico_generico(
 			tipo="bar",
 			datos=df_tech_temp,
-			titulo="Número de CPOB por Tecnología Predominante",
+			titulo="<br> Número de CPOB por Tecnología Predominante",
 			x="TECNOLOGIA",
 			y="CANTIDAD",
 		color="TECNOLOGIA",

@@ -219,7 +219,7 @@ def grafico_generico(
 					'size': 20,
 					'color': '#1a1a1a',
 					'family': 'Arial, sans-serif'
-				}
+				}	
 			}
 		)
 	
