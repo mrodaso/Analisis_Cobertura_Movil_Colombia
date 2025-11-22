@@ -100,7 +100,7 @@ Los datos analizan la cobertura móvil en Colombia desde el primer trimestre de 
 
 ### Modificar estilos
 
-Los estilos CSS se encuentran en `css/styles.css`. Puedes personalizarlos según tus necesidades.
+Los estilos CSS se encuentran en `css/styles.css`. 
 
 ### Agregar nuevos gráficos
 
