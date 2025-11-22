@@ -4,7 +4,7 @@ def render_footer():
 	st.markdown(
 		"""
 		<div class="footer-simple">
-			<p>© 2025 Dashboard Analytics. Desarrollado por <strong>Marisol Rodas</strong></p>
+			<p>© 2025 Dashboard Analytics. Desarrollado por <strong>Marisol Rodas Osorio, marisolrodas222@gmail.com</strong></p>
 		</div>
 		""",
 		unsafe_allow_html=True
