@@ -1,7 +1,11 @@
 body {
-	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-	background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
-	color: #1a1a1a;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    background: linear-gradient(180deg, #eef4f8 0%, #f8fafc 100%); /* <-- cambiar aquí (antes: #1a73cc -> #e9ecef) */
+    color: #0f1724;
+}
+
+.st-emotion-cache-i594i8 {
+	background:#E3E4FA !important; ;
 }
 
 .st-emotion-cache-zy6yx3 {
@@ -9,17 +13,11 @@ body {
 	background: transparent;
 }
 
-header {
-	backdrop-filter: blur(10px);
-	-webkit-backdrop-filter: blur(10px);
-	background: white !important;
-}
+
 
 .header-bar {
 	width: 100%;
 	background: rgba(255, 255, 255, 0.8);
-	backdrop-filter: blur(10px);
-	-webkit-backdrop-filter: blur(10px);
 	border-bottom: 1px solid rgba(232, 232, 232, 0.5);
 	border-bottom-left-radius: 20px;
 	border-bottom-right-radius: 20px;

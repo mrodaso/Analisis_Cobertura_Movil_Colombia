@@ -2,12 +2,13 @@ import streamlit as st
 from pathlib import Path
 import sys
 import pandas as pd
+import plotly.graph_objects as go
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from dashboard_code.read_csv import (
-    df, df_final_sorted, conteo_operador, conteo_tecnologia, porcentaje_tecnologia,
-    df_top, corr_matrix, df_cob_max_depto_4g, counties
+	df, df_final_sorted, conteo_operador, conteo_tecnologia, porcentaje_tecnologia,
+	df_top, corr_matrix, df_cob_max_depto_4g, counties, df_comparativo
 )
 from components.header import render_header
 from components.footer import render_footer
@@ -111,9 +112,33 @@ def main():
 	with cols[2]:
 		stat_card("CPOB", f"{total_cpob:,}", "Centros poblados", trend="up", trend_value="", trend_color="#22c55e")
 
-	st.markdown('<div style="margin: 3rem 0 2rem 0;"></div>', unsafe_allow_html=True)
+	# Card de atribución de datos (alineada y con acordeón para ver primeros 10 registros)
+
+
+	st.markdown('<div style="margin: 0rem 0 2rem 0;"></div>', unsafe_allow_html=True)
 	st.markdown('<div id="charts"></div>', unsafe_allow_html=True)
-	
+	tabla_html = df.head(100).to_html(index=False, border=0, classes='df-table')
+
+	st.markdown(
+			f"""
+			<div style="width:100%; margin:0.75rem 0 1.5rem 0; padding:14px 20px; background:#ffffff; border:1px solid #e6e6e6; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,0.06); color:#444; font-size:14px;">
+			  <div style="font-weight:600;">Conjunto de datos obtenidos del Portal de Datos Abiertos del Gobierno Nacional de Colombia</div>
+			  <div style="font-size:12px; color:#666; margin-bottom:8px;">Disponible en: https://www.datos.gov.co/dataset/Cobertura-de-servicios-m-viles/hid4-zp69/about_data</div>
+			  <details style="margin-top:8px; text-align:left;">
+			    <summary style="cursor:pointer; font-weight:600;">Ver conjunto de datos completo</summary>
+			    <div style="margin-top:10px; overflow:auto; max-height:340px;">
+			      <style>
+			        .df-table {{ width:100%; border-collapse:collapse; font-size:13px; }}
+			        .df-table th, .df-table td {{ padding:6px 8px; border:1px solid #e6e6e6; text-align:left; }}
+			        .df-table thead {{ background:#f6f6f6; font-weight:600; }}
+			      </style>
+			      {tabla_html}
+			    </div>
+			  </details>
+			</div>
+			""",
+			unsafe_allow_html=True
+		)
 	# --- GRÁFICO 1: Distribución de Tecnologías en Top Departamentos ---
 	def preprocesar_top_departamentos(datos):
 		df_top_filtrado = datos[datos['DEPARTAMENTO'].isin(df_top['DEPARTAMENTO'].unique())]
@@ -190,29 +215,29 @@ def main():
 		})
 		
 		grafico_generico(
-			tipo="bar",
-			datos=df_tech_temp,
-			titulo="<br> Número de CPOB por Tecnología Predominante",
-			x="TECNOLOGIA",
-			y="CANTIDAD",
-		color="TECNOLOGIA",
-		text="CANTIDAD",
-		color_discrete_map=COLOR_TECNOLOGIAS,
-		height=610,
-		key="grafico_3_cpob_tecnologia",
-		trace_updates={
-				'texttemplate': '%{text}<br>(%{customdata}%)',
-				'textposition': 'outside',
-				'textfont': dict(size=12, color='black'),
-				'customdata': df_tech_temp['PORCENTAJE']
-			},
-			layout_updates={
-				'margin': dict(l=60, r=60, t=80, b=60),
-				'xaxis': dict(tickfont=dict(size=11)),
-				'yaxis': dict(tickfont=dict(size=11)),
-				'showlegend': False
-			}
-		)
+            tipo="bar",
+            datos=df_tech_temp,
+            titulo="<br> Número de CPOB por Tecnología Predominante",
+            x="TECNOLOGIA",
+            y="CANTIDAD",
+            # quitar color="TECNOLOGIA" para evitar barras duplicadas/desplazadas
+            text="CANTIDAD",
+            color_discrete_map=COLOR_TECNOLOGIAS,
+            height=610,
+            key="grafico_3_cpob_tecnologia",
+            custom_data=['PORCENTAJE'],
+            trace_updates={
+                'texttemplate': '%{text}<br>(%{customdata[0]:.1f}%)',
+                'textposition': 'outside',
+                'textfont': dict(size=12, color='black')
+            },
+            layout_updates={
+                'margin': dict(l=60, r=60, t=80, b=60),
+                'xaxis': dict(tickfont=dict(size=11)),
+                'yaxis': dict(tickfont=dict(size=11)),
+                'showlegend': False
+            }
+        )
 	
 	# --- GRÁFICO 4 y 5: Layout Bento ---
 	st.markdown('<div id="cobertura"></div>', unsafe_allow_html=True)
@@ -423,6 +448,59 @@ def main():
 						}
 					}
 				)
+
+	# --- GRÁFICO COMPARATIVO: Departamentos con mayor y menor cobertura (Plotly horizontal bars)
+	# Se muestra justo después de los mapas coropléticos
+	st.markdown('<div id="comparativo"></div>', unsafe_allow_html=True)
+	try:
+		# Preparar orden y categorías
+		categorias = list(df_comparativo['DEPARTAMENTO'])
+
+		fig = go.Figure()
+		operadores = df_comparativo['OPERADOR_MAX'].unique()
+		# Añadir una traza por operador para generar leyenda automática
+		for op in operadores:
+			sub = df_comparativo[df_comparativo['OPERADOR_MAX'] == op]
+			if sub.empty:
+				continue
+			fig.add_trace(go.Bar(
+				x=sub['PORCENTAJE_COBERTURA'],
+				y=sub['DEPARTAMENTO'],
+				orientation='h',
+				name=op,
+				marker_color=COLOR_OPERADORES.get(op, COLOR_OPERADORES['OTRO']),
+				text=[f"{abs(v):.1f}%" for v in sub['PORCENTAJE_COBERTURA']],
+				textposition='outside',
+				hovertemplate='<b>%{y}</b><br>Porcentaje: %{x:.1f}%<extra></extra>'
+			))
+
+		# Forzar orden de las categorías en el eje Y
+		fig.update_yaxes(categoryorder='array', categoryarray=categorias)
+
+		# Línea vertical en 0
+		fig.add_vline(x=0, line_width=1, line_color='black')
+
+		# Layout
+		fig.update_layout(
+			title=dict(text='Departamentos con mayor y menor cobertura móvil promedio (2024)', x=0.5, xanchor='center'),
+			xaxis_title='Porcentaje de cobertura promedio (%)',
+			yaxis_title='Departamento',
+			height=600,
+			margin=dict(l=200, r=80, t=100, b=80),
+			legend_title_text='Operador predominante'
+		)
+
+		# Usar el componente genérico para renderizar y forzar la leyenda de CLARO abajo a la derecha
+		grafico_generico(
+			tipo='custom',
+			datos=df_comparativo,
+			fig=fig,
+			key='grafico_10_comparativo',
+			force_legend=[{'name': 'CLARO', 'color': COLOR_OPERADORES.get('CLARO', '#ED1B24')}],
+			height=600
+		)
+	except Exception as e:
+		st.warning(f"No se pudo generar el gráfico comparativo (Plotly): {e}")
 		
 	st.markdown('<div id="footer"></div>', unsafe_allow_html=True)
 	

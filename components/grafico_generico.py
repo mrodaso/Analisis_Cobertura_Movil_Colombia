@@ -57,6 +57,8 @@ def grafico_generico(
 	# Extraer layout_updates y trace_updates antes de crear el gráfico
 	layout_updates = kwargs.pop('layout_updates', {})
 	trace_updates = kwargs.pop('trace_updates', {})
+	# Permite forzar items en la leyenda: list of dicts [{'name': 'CLARO', 'color': '#ED1B24'}, ...]
+	force_legend = kwargs.pop('force_legend', None)
 	
 	# Crear el gráfico según el tipo
 	fig = None
@@ -222,6 +224,23 @@ def grafico_generico(
 				}	
 			}
 		)
+
+	# Si se pide, añadir entradas forzadas a la leyenda (trazas invisibles)
+	if force_legend:
+		try:
+			for item in force_legend:
+				name = item.get('name') if isinstance(item, dict) else None
+				color = item.get('color') if isinstance(item, dict) else None
+				if not name or not color:
+					continue
+				# Añadir traza tipo Scatter con valores None para que solo aparezca en la leyenda
+				fig.add_trace(go.Scatter(x=[None], y=[None], mode='markers',
+					marker=dict(color=color, size=10), name=name, showlegend=True))
+			# Posicionar la leyenda abajo a la derecha
+			fig.update_layout(legend=dict(x=1, y=0, xanchor='right', yanchor='bottom'))
+		except Exception:
+			# No bloquear el gráfico principal si falla
+			pass
 	
 	# Aplicar estilos de card al gráfico con padding, border-radius y box-shadow
 	fig.update_layout(
