@@ -2,6 +2,8 @@
 
 Dashboard interactivo desarrollado con Streamlit para analizar la cobertura móvil en Colombia por departamento, operador y tecnología.
 
+Enlace de la página puesta en producción: https://drc28rkqizznwntfjdzxed.streamlit.app/
+
 ## 📋 Requisitos Previos
 
 - Python 3.8 o superior
