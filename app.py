@@ -269,7 +269,7 @@ def main():
 		grafico_generico(
             tipo="bar",
             datos=df_tech_temp,
-            titulo="<br> Número de CPOB por Tecnología Predominante",
+            titulo="<br> Número de CPOB por Tecnología Predominante (2024)",
             x="TECNOLOGIA",
             y="CANTIDAD",
             # quitar color="TECNOLOGIA" para evitar barras duplicadas/desplazadas
